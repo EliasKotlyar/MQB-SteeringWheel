@@ -22,8 +22,8 @@ public:
 
     int verboseMode = -1;
     unsigned long baud = 19200;
-    unsigned int pin_rx = 0;
-    unsigned int pin_tx = 0;
+    int8_t pin_rx = 0;
+    int8_t pin_tx = 0;
 
     // 8 Data Bytes + ChkSum + some space for receiving complete frames
     uint8_t LinMessage[8 + 1 + 4] = {0};

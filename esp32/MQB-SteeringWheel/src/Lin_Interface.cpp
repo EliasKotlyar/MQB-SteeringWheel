@@ -9,7 +9,22 @@
 #include "Lin_Interface.hpp"
 
 #include <Arduino.h>
-
+/// Send a Break for introduction of a Frame
+/// This is done by sending a Byte (0x00) + Stop Bit by using half baud rate
+/// @returns if the 0x00 has been send
+size_t Lin_Interface::writeBreak()
+{
+    int no_bits = 13;
+    int period = 52;
+    unsigned int del = period*no_bits;
+    //pinMode(pin_tx, OUTPUT);
+    pinMode(pin_tx, OUTPUT);
+    digitalWrite(pin_tx, LOW);
+    delayMicroseconds(del);
+    digitalWrite(pin_tx, HIGH);     
+    delayMicroseconds(period);  
+    return 0;
+}
 /// @brief reads data from a lin device by requesting a specific FrameID
 /// @details Start frame and read answer from bus device
 /// The received data will be passed to the Lin_Interface::LinMessage[] array
@@ -22,88 +37,36 @@ bool Lin_Interface::readFrame(uint8_t FrameID)
     uint8_t ProtectedID = getProtectedID(FrameID);
     bool ChecksumValid = false;
 
+    pinMode(pin_tx, OUTPUT);
+    digitalWrite(pin_tx, HIGH);
+    sleep(1);
+
+    //Serial.printf("%02X.", ProtectedID);
+    //Serial.printf("%d\n", ProtectedID);
     // start transmission
+    writeBreak();
     HardwareSerial::begin(baud, SERIAL_8N1,pin_rx,pin_tx);
-    writeBreak();                       // initiate Frame with a Break
+    // initiate Frame with a Break
     HardwareSerial::write(0x55);        // Sync
-    HardwareSerial::write(ProtectedID); // PID
+    HardwareSerial::write(0x3e); // PID
     HardwareSerial::flush();
+    
     // wait for available data
     delay(100);
 
     // Break, Sync and ProtectedID will be received --> discard them
-    int bytes_received = -4;
+    
+    int bytes_received = 0;
+    
     while (HardwareSerial::available())
     {
-        if (bytes_received >= (8 + 1)) // max 8x Data + 1x Checksum
-        {
-            // receive max 9 Bytes: 8 Data + 1 Chksum
-            break;
-        }
-        switch (bytes_received)
-        {
-        case -4:    //??
-        case -3:    // break = 0x00
-        case -2:    // sync = 0x55
-        case -1:    // Protected ID
-        {
-            // discard Sync and PID (send by us)
-            uint8_t buffer = HardwareSerial::read();
-            // Sync and PID may to be verified here
-            if (buffer == 0x00) { // break
-                bytes_received = -3;
-            }
-            if (buffer == 0x55) { // sync
-                bytes_received = -2;
-            }
-            if (buffer == ProtectedID) { // PID
-                bytes_received = -1;
-            }
-            break;
-        }
-        default: // Data 0...7, Checksum
-            // Receive and save only Data Byte (send by slave)
-            LinMessage[bytes_received] = HardwareSerial::read();
-        }
-        bytes_received++;
+        uint8_t b = HardwareSerial::read();
+        Serial.printf("Byte empfangen");
+        Serial.printf("%02X", b);
     }
-    uint8_t Checksum = LinMessage[bytes_received - 1];
-    bytes_received--;
-
-    // erase data in buffer, in case a 9th or 10th Byte was received
-    HardwareSerial::flush();
-    while (HardwareSerial::available()) {
-        HardwareSerial::read();
-        if (verboseMode > 0)
-        {
-            Serial.print("additional byte discarded\n");
-        }
-    }
-
+    
     HardwareSerial::end();
-
-    // verify Checksum
-    ChecksumValid = (0xFF == (uint8_t)(Checksum + ~getChecksum(ProtectedID, bytes_received)));
-
-    if (verboseMode > 0)
-    {
-        Serial.printf(" --->>>>>> FID %02Xh        = 55|%02X|", FrameID, ProtectedID);
-        for (int i = 0; i < 8; ++i)
-        {
-            if (i >= bytes_received)
-                break;
-            Serial.printf("%02X.", LinMessage[i]);
-        }
-        Serial.printf("\b|%02X", Checksum);
-
-        if (!ChecksumValid)
-        {
-            Serial.printf(" Checksum failed ");
-        }
-
-        Serial.println();
-    }
-
+    digitalWrite(pin_tx, HIGH); 
     return ChecksumValid;
 } // bool readFrame()
 
@@ -169,6 +132,7 @@ void Lin_Interface::writeFrame(uint8_t FrameID, uint8_t dataLen)
     }
     uint8_t Checksum_received = LinMessage[bytes_received - 1];
     bytes_received--;
+    Serial.printf("%02X\n", bytes_received);
 
     // erase data in buffer, in case a 9th or 10th Byte was received
     HardwareSerial::flush();
@@ -179,7 +143,7 @@ void Lin_Interface::writeFrame(uint8_t FrameID, uint8_t dataLen)
 
     if (verboseMode > 0)
     {
-        Serial.printf(" <<<<<<--- FID %02Xh (%02X)   = %02X|%02X|", FrameID, ProtectedID, RX_Sync, RX_ProtectedID);
+        Serial.printf("FID %02Xh (%02X)   = %02X|%02X|", FrameID, ProtectedID, RX_Sync, RX_ProtectedID);
         for (int i = 0; i < 8 + 1 + 4; ++i)
         {
             if (i >= bytes_received)
@@ -226,23 +190,7 @@ void Lin_Interface::writeFrameClassic(uint8_t FrameID, uint8_t dataLen)
     HardwareSerial::end();
 } // void Lin_Interface::writeFrameClassic
 
-/// Send a Break for introduction of a Frame
-/// This is done by sending a Byte (0x00) + Stop Bit by using half baud rate
-/// @returns if the 0x00 has been send
-size_t Lin_Interface::writeBreak()
-{
-    HardwareSerial::flush();
-    // configure to half baudrate --> a t_bit will be doubled
-    HardwareSerial::updateBaudRate(baud >> 1);
-    // write 0x00, including Stop-Bit (=1),
-    // qualifies when writing in slow motion like a Break in normal speed
-    size_t ret = write(uint8_t(0x00));
-    // ensure this is send
-    HardwareSerial::flush();
-    // restore normal speed
-    HardwareSerial::updateBaudRate(baud);
-    return ret;
-}
+
 
 /// get Protected ID by calculating parity bits and combine with Frame ID
 /// @param FrameID to be converted
