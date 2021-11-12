@@ -39,3 +39,4 @@ protected:
     uint8_t getProtectedID(uint8_t FrameID);
     uint8_t getChecksum(uint8_t ProtectedID, uint8_t datalen);
 };
+  
