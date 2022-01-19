@@ -5,8 +5,12 @@
 #pragma once
 #include "Lin_Interface.hpp"
 #include <Arduino.h>
-#define LIN_RX 18
-#define LIN_TX 19
+//#define LIN_TX 32
+//#define LIN_RX 33
+
+#define LIN_TX 25
+#define LIN_RX 26
+
 #define IDNAME(name) #name
 
 enum MQBKeys
