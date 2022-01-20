@@ -93,8 +93,14 @@ bool MQB_Interface::hasKeysPressed()
 {
   return lastKeyPressed == MQB_NONE ? false : true;
 }
-String MQB_Interface::getLastKeyString()
+
+byte MQB_Interface::getLastKey()
 {
-  String name = MQBKeyNames[lastKeyPressed];
+  return lastKeyPressed;
+}
+
+String MQB_Interface::getKeyName(byte key)
+{
+  String name = MQBKeyNames[key];
   return name;
 }

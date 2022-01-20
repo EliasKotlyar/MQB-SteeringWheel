@@ -92,7 +92,10 @@ public:
     void setup();
     void loop();
     void getLastKeyCode();
-    String getLastKeyString();
+    
+
+    static String getKeyName(byte key);
+    byte getLastKey();
     bool hasKeysPressed();
     
 

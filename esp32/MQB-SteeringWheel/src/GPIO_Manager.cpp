@@ -1,4 +1,4 @@
-#include "GPIO_Manager.hpp";
+#include "GPIO_Manager.hpp"
 
 GPIO_Manager::GPIO_Manager(void)
 {

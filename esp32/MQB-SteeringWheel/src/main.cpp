@@ -1,47 +1,56 @@
-#include <Arduino.h>
-
-
+#include <ESP8266React.h>
+#include <LightStateService.h>
+#include <MQBService.h>
+#include <MQB_Interface.hpp>
+MQB_Interface mqb;
+#define SERIAL_BAUD_RATE 115200
 #define LIN_SLP 13
 
-#include <MQB_Interface.hpp>
-#include <Led_Manager.hpp>
-#include <GPIO_Manager.hpp>;
-// using UART 2 for LinBus
-MQB_Interface mqb;
-Led_Manager led;
-GPIO_Manager io;
-static QueueHandle_t delay_queue;
-
-void setup()
-{
-  Serial.begin(115200);
-  while (!Serial)
-    ;
-
-  Serial.println("Started ");
+AsyncWebServer server(80);
+ESP8266React esp8266React(&server);
+LightStateService lightStateService = LightStateService(&server, esp8266React.getSecurityManager());
+MQBService mqbStateService = MQBService(&server, esp8266React.getSecurityManager());
 
 
+void setup() {
+  // start serial and filesystem
+  Serial.begin(SERIAL_BAUD_RATE);
+
+  mqb.setup();
 
   pinMode(LIN_SLP, OUTPUT);
   digitalWrite(LIN_SLP, HIGH);
-  io.setup();
-  mqb.setup();
-  io.triggerPin(0);
+
+
+  // start the framework and demo project
+  esp8266React.begin();
+
+  // load the initial light settings
+  mqbStateService.begin();
+
+
+  // start the server
+  server.begin();
 }
 
-void loop()
-{
+void loop() {
+  // run the framework's loop function
+  esp8266React.loop();
   mqb.loop();
   if(mqb.hasKeysPressed()){
-    String key = mqb.getLastKeyString();
-    Serial.println("Key Pressed " + key);
+    byte key = mqb.getLastKey();
+    String keyStr = MQB_Interface::getKeyName(key);
+    Serial.println("Key Pressed " + keyStr);    
+    mqbStateService.update([&](MQBState& state) {
+      if (state.lastKeyPressed == key) {
+        return StateUpdateResult::UNCHANGED; // lights were already on, return UNCHANGED
+      }
+      state.lastKeyPressed = key;  // turn on the lights
+      return StateUpdateResult::CHANGED; // notify StatefulService by returning CHANGED
+    }, "timer");
+
     //digitalWrite(LED_RED, LOW);   // turn the LED on (HIGH is the voltage level)
     //delay(1000);                       // wait for a second
     //digitalWrite(LED_RED, HIGH);    // turn the LED off by making the voltage LOW
   }
-
-  
-
-  //delay(50);
-  
 }
