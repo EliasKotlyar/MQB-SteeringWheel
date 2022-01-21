@@ -1,49 +1,40 @@
-import { FC } from 'react';
+import MqbStatus from './StatusTab/MqbStatus'
+import React, { FC } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { Typography } from '@mui/material';
+import { Tab } from '@mui/material';
 
+import { RouterTabs, useRouterTab, useLayoutTitle } from '../components';
 
-import { WEB_SOCKET_ROOT } from '../api/endpoints';
-import { BlockFormControlLabel, FormLoader, MessageBox, SectionContent } from '../components';
-import { updateValue, useWs } from '../utils';
+import DemoInformation from './DemoInformation';
+import LightStateRestForm from './LightStateRestForm';
+import LightMqttSettingsForm from './LightMqttSettingsForm';
+import LightStateWebSocketForm from './LightStateWebSocketForm';
+import PqStatus from "./StatusTab/PqStatus";
+import ShiftStatus from "./StatusTab/ShiftStatus";
 
-import { MQBState } from './types';
-
-export const MQB_SETTINGS_WEBSOCKET_URL = WEB_SOCKET_ROOT + "MQBState";
-
-const LightStateWebSocketForm: FC = () => {
-  const { connected, updateData, data } = useWs<MQBState>(MQB_SETTINGS_WEBSOCKET_URL);
-
-
-  const content = () => {
-    if (!connected || !data) {
-      return (<FormLoader message="Connecting to WebSocket…" />);
-    }
-    return (
-      <>
-        <div>Button State: {data.lastKeyPressed}</div>        
-      </>
-    );
-  };
+const StatusTab: FC = () => {
+  useLayoutTitle("Demo Project");
+  const { routerTab } = useRouterTab();
 
   return (
     <>
-      {content()}
+      <RouterTabs value={routerTab}>
+        <Tab value="mqb" label="Mqb Status" />
+        <Tab value="pq" label="PQ Status" />
+        <Tab value="shift" label="Shift Register Status" />
+
+      </RouterTabs>
+      <Routes>
+        <Route path="mqb" element={<MqbStatus />} />
+        <Route path="pq" element={<PqStatus />} />
+        <Route path="shift" element={<ShiftStatus />} />
+        <Route path="/*" element={<Navigate replace to="mqb" />} />
+      </Routes>
     </>
   );
 };
 
-
-
-const StatusTab: FC = () => (
-  <SectionContent title='Demo Information' titleGutter>
-    
-    <Typography variant="body1" paragraph>
-      MQB State
-      <LightStateWebSocketForm/>
-    </Typography>
-    
-  </SectionContent>
-);
-
 export default StatusTab;
+
+

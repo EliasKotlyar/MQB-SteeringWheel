@@ -5,12 +5,14 @@ type UpdateEntity<S> = (
 export const numberValue = (value: number) => isNaN(value) ? "" : value.toString();
 
 export const extractEventValue = (event: React.ChangeEvent<HTMLInputElement>) => {
+  console.log(event.target.type)
   switch (event.target.type) {
     case "number":
       return event.target.valueAsNumber;
     case "checkbox":
       return event.target.checked;
     default:
+      //console.log(event.target.value)
       return event.target.value;
   }
 };

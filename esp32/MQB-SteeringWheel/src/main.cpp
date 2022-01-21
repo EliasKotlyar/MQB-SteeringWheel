@@ -2,6 +2,7 @@
 #include <LightStateService.h>
 #include <MQBService.h>
 #include <MQB_Interface.hpp>
+#include <ShiftRegService.h>
 MQB_Interface mqb;
 #define SERIAL_BAUD_RATE 115200
 #define LIN_SLP 13
@@ -10,6 +11,7 @@ AsyncWebServer server(80);
 ESP8266React esp8266React(&server);
 LightStateService lightStateService = LightStateService(&server, esp8266React.getSecurityManager());
 MQBService mqbStateService = MQBService(&server, esp8266React.getSecurityManager());
+ShiftRegService shiftRegService = ShiftRegService(&server, esp8266React.getSecurityManager());
 
 
 void setup() {
@@ -27,6 +29,7 @@ void setup() {
 
   // load the initial light settings
   mqbStateService.begin();
+  shiftRegService.begin();
 
 
   // start the server

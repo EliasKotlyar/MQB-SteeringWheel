@@ -11,3 +11,7 @@ export interface LightMqttSettings {
 export interface MQBState {
   lastKeyPressed: string;
 }
+
+export interface ShiftRegState {
+  pin: number;
+}
