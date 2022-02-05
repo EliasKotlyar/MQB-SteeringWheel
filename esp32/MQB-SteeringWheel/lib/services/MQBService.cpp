@@ -1,7 +1,6 @@
 #include <MQBService.h>
 
-MQBService::MQBService(AsyncWebServer* server,
-                                     SecurityManager* securityManager) :
+MQBService::MQBService(AsyncWebServer* server, SecurityManager* securityManager) :
     _httpEndpoint(MQBState::read,
                   MQBState::update,
                   this,
@@ -15,15 +14,13 @@ MQBService::MQBService(AsyncWebServer* server,
                server,
                "/ws/MQBState",
                securityManager,
-               AuthenticationPredicates::IS_AUTHENTICATED)
- {
-
+               AuthenticationPredicates::IS_AUTHENTICATED) {
   // configure settings service update handler to update LED state
   addUpdateHandler([&](const String& originId) { onConfigUpdated(); }, false);
 }
 
 void MQBService::begin() {
-  _state.lastKeyPressed = DEFAULT_KEYPRESSED_STATE;
+  _state.lastKeyPressed = MQB_NONE;
   onConfigUpdated();
 }
 
@@ -32,5 +29,20 @@ void MQBService::onConfigUpdated() {
 }
 
 void MQBService::registerConfig() {
- 
+}
+
+void MQBService::setKey(byte key) {
+  this->update(
+      [&](MQBState& state) {
+        if (state.lastKeyPressed == key) {
+          return StateUpdateResult::UNCHANGED;
+        }
+        if (key != MQB_NONE) {
+          String keyStr = MQB_Interface::getKeyName(key);
+          Serial.println("Key Pressed " + keyStr);
+        }
+        state.lastKeyPressed = key;
+        return StateUpdateResult::CHANGED;
+      },
+      "setkeymethod");
 }

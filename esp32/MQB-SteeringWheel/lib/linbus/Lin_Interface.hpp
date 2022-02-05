@@ -22,7 +22,11 @@
 
 
 
-class Lin_Interface : private HardwareSerial
+#pragma once
+
+#include <Arduino.h>
+
+class Lin_Interface : public HardwareSerial
 {
 public:
     //inherit constructor from HardwareSerial (Parameter: int uart_nr)
@@ -37,7 +41,6 @@ public:
     uint8_t LinMessage[8 + 1 + 4] = {0};
 
     bool readFrame(uint8_t FrameID);
-    bool readFrame(void);
 
     void writeFrame(uint8_t FrameID, uint8_t datalen);
     void writeFrameClassic(uint8_t FrameID, uint8_t datalen);
@@ -48,4 +51,3 @@ protected:
     uint8_t getProtectedID(uint8_t FrameID);
     uint8_t getChecksum(uint8_t ProtectedID, uint8_t datalen);
 };
-  

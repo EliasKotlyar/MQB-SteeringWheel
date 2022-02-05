@@ -1,9 +1,8 @@
 #include <Arduino.h>
 #include "PQ_Interface.hpp"
 
-
 void PQ_Interface::setup() {
-    // Button Data:
+  // Button Data:
   buttons_response[0] = 0xFF;
   buttons_response[1] = 0x00;
   buttons_response[2] = 0xFF;
@@ -20,152 +19,129 @@ void PQ_Interface::setup() {
 
   // Lin
   LinBus.baud = 19200;
-  LinBus.pin_rx = LIN2_RX;
-  LinBus.pin_tx = LIN2_TX;
+  LinBus.pin_rx = LIN1_RX;
+  LinBus.pin_tx = LIN1_TX;
   LinBus.verboseMode = 1;
 
   // Serial.println("\nPQ init");
 }
 
-
 void PQ_Interface::loop() {
+  // Serial.println(LinBus.pin_rx);
+  // Serial.println(LinBus.pin_tx);
+  LinBus.begin(LinBus.baud, SERIAL_8N1, LinBus.pin_rx, LinBus.pin_tx);
 
-  bool chkSumValid = LinBus.readFrame();
-  //Serial.println(chkSumValid);
-  /*
-  int result = 0;
+  while (1) {
+    int protectedId = 0;
+    // switch()
+    if (LinBus.available()) {
+      int startTime = millis();
+      int currentPosition = 0;
 
-  while (LinBus.available()) {
-    request_time = millis();
-    uint8_t c = LinBus.read();
-    // if (this->verboseMode == 2) {Serial.println("\nPQ in: "); Serial.println(c, HEX);}
-    switch (state) {
-      case IDLE:
-        if (c == 0x55) {
-          // if (this->verboseMode == 2) {Serial.println("\nPQ IDLE 55");}
-          request[0] = c;
-          request_data_index = 0;
-          state = READ_REQUEST;
-          result = 1;
-        }
-        break;
-      case READ_REQUEST:
-        request_id = c & 0b00111111;
-        if (this->verboseMode == 2) {
-          Serial.println("\nPQ request ");
-          Serial.println(request_id, HEX);
-        }
-        if (request_id == PQ_BUTTONS_ID) {
-          if (LinBus.available()) {
-            if (this->verboseMode > 0) {
-              Serial.println("\nPQ error: income data after request");
-            }
-            state = IDLE;
-            result = -1;
-          } else {
-            state = WRITE_RESPONSE;
-            buttons_response[0] = 0xF0 | ((buttons_response[0] + 1) % 0x0F);
-            if ((this->verboseMode == 1) && (buttons_response[1] != pressed_button)) {
-              Serial.println("\nPQ button ");
-              Serial.println(buttons_response[1], HEX);
-            }
-            buttons_response[1] = pressed_button;
-            buttons_response[6] = pressed_gear_shifter | 0x30;
-            if (this->verboseMode == 2) {
-              Serial.println("\nPQ response ");
-              Serial.println(request_id, HEX);
-              Serial.println(":");
-              for (int i = 0; i < 8; i++) {
-                Serial.println(" ");
-                Serial.println(buttons_response[i], HEX);
+      byte buffer[255];
+
+      byte currentData;
+      // Read until timeout(Idea from https://github.com/skpang/Teensy32_LIN-bus_slave_demo/blob/master/lin-bus.cpp)
+      while ((millis() - startTime) <= 7) {
+        if (LinBus.available()) {
+          currentData = LinBus.read();
+          currentPosition++;
+          switch (currentPosition) {
+            case 1:
+              if (currentData != 0) {
+                if (LinBus.verboseMode == 1) {
+                  Serial.println("Discarding Frame, because of invalid header");
+                }
               }
-            }
-            write_response(PQ_BUTTONS_ID, buttons_response, 8);
-            state = IDLE;
-            result = 1;
+              break;
+            case 2:
+              if (currentData != 0x55) {
+                if (LinBus.verboseMode == 1) {
+                  Serial.println("Discarding Frame, because of invalid header");
+                }
+              }
+              break;
+            case 3:
+              protectedId = currentData;
+              processRequest(protectedId);
+              break;
+            default:
+              // buffer[currentPosition] = currentBuffer;
+              break;
           }
-        } else if (request_id == PQ_LIGHT_ID) {
-          state = READ_DATA;
-          result = 1;
-        } else {
-          while (LinBus.available())
-            LinBus.read();
-          state = IDLE;
-          result = -1;
         }
-        break;
-      case READ_DATA:
-        request[request_data_index++] = c;
-        if (request_id == PQ_LIGHT_ID && (request_data_index == 4)) {
-          state = READ_CHECKSUM;
-        }
-        result = 1;
-        break;
-      case READ_CHECKSUM:
-        uint8_t checksum = dataChecksum(request_id, request, request_data_index);
-        if (checksum == c) {
-          if (this->verboseMode == 2) {
-            Serial.println("\nPQ data ");
-            Serial.println(request_id, HEX);
-            Serial.println(":");
-            for (int i = 0; i < request_data_index; i++) {
-              Serial.println(" ");
-              Serial.println(request[i], HEX);
+      }
+
+      /*
+          if (currentPosition != 3) {
+            // Its a request + response
+            for (int i = 0; i < currentPosition; i++) {
+              Serial.printf("%02X ", buffer[i]);
             }
+            Serial.println("");
           }
-          if (request_id == PQ_LIGHT_ID) {
-            memcpy(light_data, request, 4);
-          }
-          state = IDLE;
-          result = 1;
-        } else {
-          if (this->verboseMode > 0) {
-            Serial.println("\nPQ checksum mismatch ");
-            Serial.println(request_id, HEX);
-            Serial.println(": ");
-            for (int i = 0; i < request_data_index; i++) {
-              Serial.println(" ");
-              Serial.println(request[i], HEX);
-            }
-            Serial.println(" => ");
-            Serial.println(checksum, HEX);
-            Serial.println("vs ");
-            Serial.println(c, HEX);
-          }
-          state = IDLE;
-          result = -1;
-        }
-        break;
+          */
     }
   }
-  */
-  //return result;
 }
 
-/*
-int PQ_Interface::write_response(uint8_t ident, uint8_t data[], uint8_t data_size) {
-  uint8_t cksum = dataChecksum(ident, data, data_size);
-  for (uint8_t i = 0; i < data_size; i++) {
-    LinBus.write(data[i]);
+/// @brief Checksum calculation for LIN Frame
+/// @details
+/// EnhancedChecksum considers ProtectedID
+///     LIN 2.0 only for FrameID between 0x00..0x3B
+///     LIN 2.0 uses for 0x3C and above ClassicChecksum for legacy (auto detected)
+/// ClassicChecksum
+///     LIN 1.x in general (use 'ProtectedID' = 0x00 to ensure that)
+/// see LIN Specification 2.2A (2021-12-31) for details
+///     https://microchipdeveloper.com/local--files/lin:specification/LIN-Spec_2.2_Rev_A.PDF
+///     2.8.3 Example of Checksum Calculation
+/// @param ProtectedID initial Byte, set to 0x00, when calc Checksum for classic LIN Frame
+/// @param dataLen length of Frame (only Data Bytes)
+/// @returns calculated checksum
+uint8_t PQ_Interface::getChecksum(uint8_t ProtectedID, uint8_t* data, uint8_t dataLen) {
+  uint16_t sum = ProtectedID;
+  // test FrameID bits for classicChecksum
+  if ((sum & 0x3F) >= 0x3C) {
+    // LIN 1.x: legacy
+    // LIN 2.0: don't include PID for ChkSum calculation on configuration and reserved frames
+    sum = 0x00;
   }
-  LinBus.write(cksum);
-  return 1;
-}
-
-#define BIT(data, shift) ((addr & (1 << shift)) >> shift)
-uint8_t addrParity(uint8_t addr) {
-  uint8_t p0 = BIT(addr, 0) ^ BIT(addr, 1) ^ BIT(addr, 2) ^ BIT(addr, 4);
-  uint8_t p1 = ~(BIT(addr, 1) ^ BIT(addr, 3) ^ BIT(addr, 4) ^ BIT(addr, 5));
-  return (p0 | (p1 << 1)) << 6;
-}
-
-uint8_t dataChecksum(uint8_t id, const uint8_t* message, uint8_t nBytes) {
-  uint16_t sum = id | addrParity(id);
-  while (nBytes-- > 0)
-    sum += *(message++);
-  // Add the carry
-  while (sum >> 8)  // In case adding the carry causes another carry
-    sum = (sum & 255) + (sum >> 8);
+  // sum up all bytes (including carryover to the high byte)
+  // ID allready considered
+  while (dataLen-- > 0)
+    sum += data[dataLen];
+  // add high byte (carry over) to the low byte
+  while (sum >> 8)
+    sum = (sum & 0xFF) + (sum >> 8);
+  // inverting result
   return (~sum);
 }
-*/
+
+// Response Handler:
+void PQ_Interface::processRequest(uint8_t protectedId) {
+  if (protectedId == 0xF0) {
+    //writeResponse(protectedId, buttons_response, 8);
+  }
+  if (protectedId == 0x61) {
+    writeResponse(protectedId, light_data, 4);
+  }
+}
+// Writes a response back to PQ
+void PQ_Interface::writeResponse(uint8_t protectedId, uint8_t* data, uint8_t dataLen) {
+  //Serial.printf("%02X ", protectedId);
+  //data[2] = random(100, 255);
+  for (int i = 0; i < dataLen; ++i) {
+    data[i] = random(0, 255);    
+    //data[i] = random(0, 255);
+    //Serial.printf("%02X ", data[i]);
+  }
+  //Serial.println();
+
+  uint8_t cksum = getChecksum(0x00, data, dataLen);
+  for (int i = 0; i < dataLen; ++i) {
+    LinBus.write(data[i]);  // Message (array from 1..8)
+  }
+  LinBus.write(cksum);
+  LinBus.flush();
+}
+

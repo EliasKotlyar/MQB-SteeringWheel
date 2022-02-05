@@ -78,6 +78,8 @@ const char static *MQBKeyNames[] = {
     IDNAME(MQB_REVERSE),
     IDNAME(MQB_HORN),    
     IDNAME(MQB_ONOFF),
+        // No Key pressed:
+    IDNAME(MQB_NONE),
 
 };
 

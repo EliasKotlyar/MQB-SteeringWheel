@@ -85,7 +85,7 @@ bool Lin_Interface::readFrame(uint8_t FrameID)
     // verify Checksum
     ChecksumValid = (0xFF == (uint8_t)(Checksum + ~getChecksum(ProtectedID, bytes_received)));
 
-    if (verboseMode > 0 && bytes_received!= -5)
+    if (verboseMode > 0)
     {
         Serial.printf(" --->>>>>> FID %02Xh        = 55|%02X|", FrameID, ProtectedID);
         for (int i = 0; i < 8; ++i)
@@ -106,120 +106,6 @@ bool Lin_Interface::readFrame(uint8_t FrameID)
 
     return ChecksumValid;
 } // bool readFrame()
-
-/// @brief reads data from a lin device by requesting a specific FrameID
-/// @details Start frame and read answer from bus device
-/// The received data will be passed to the Lin_Interface::LinMessage[] array
-/// Receives as much as possible, but maximum 8 data byte + checksum
-/// Verify Checksum according to LIN 2.0 rules
-/// @param FrameID ID of frame (will be converted to protected ID)
-/// @returns verification of checksum was succesful
-bool Lin_Interface::readFrame(void)
-{
-    uint8_t ProtectedID;
-    uint8_t FrameId;
-    bool ChecksumValid = false;
-
-    //Serial.println(pin_tx);
-    //Serial.println(pin_rx);    
-    //Serial.println(baud);
-    
-    // start transmission
-    HardwareSerial::begin(baud, SERIAL_8N1,pin_rx,pin_tx);
-
-    /*
-    while(1){
-        if(HardwareSerial::available()){
-            uint8_t buffer = HardwareSerial::read();
-            if(buffer == 0x55 && buffer == 0x00){
-                
-            }else{
-                Serial.println(buffer);
-            }
-        }
-        delay(10);
-        
-    }
-    */
-    
-    // wait for available data
-    
-    enum {
-        LIN_BREAK,
-        LIN_SYNC,
-        LIN_PROTECTED_ID,
-        LIN_ADDITIONAL_DATA
-    } state;
-    // Break, Sync and ProtectedID will be received --> discard them
-    int bytes_received = 0;
-    int currentState = LIN_BREAK;
-    // Wait until a message arrives:
-    while(! HardwareSerial::available()){
-        delay(10);
-    }
-    // Process Message:
-    while (HardwareSerial::available())
-    {
-        uint8_t buffer = HardwareSerial::read();
-        switch(currentState){
-            case LIN_BREAK:
-                // If readen byte is zero, proceed
-                if(buffer == 0){
-                    currentState = LIN_SYNC;
-                }
-            break;
-            case LIN_SYNC:
-                // If readen byte is zero, proceed
-                if(buffer == 0x55){
-                    currentState = LIN_PROTECTED_ID;
-                }else{
-                    currentState = LIN_BREAK;
-                }
-            break;
-            case LIN_PROTECTED_ID:
-                ProtectedID = buffer;      
-                currentState = LIN_ADDITIONAL_DATA;          
-            break;
-            case LIN_ADDITIONAL_DATA:
-                LinMessage[bytes_received] = buffer;
-                bytes_received++;
-        }
-    }   
-//#define PQ_BUTTONS_ID 0x0E
-//#define PQ_LIGHT_ID 0x0D
-    
-    //Serial.printf("Protected ID: %02X\n", ProtectedID);
-//    Serial.printf("Frame ID: %02X\n", rameId);
-    //Serial.printf("Bytes: %02X\n", bytes_received);
-    // Answer only to valid requests:
-    if(bytes_received != 0){
-        return ChecksumValid;
-    }
-
-    byte dataLen = 4;
-
-    LinMessage[0] = 0xF0;
-    LinMessage[1] = 0x00;
-    LinMessage[2] = 0xFF;
-    LinMessage[3] = 0xF0;
-    LinMessage[4] = 0x60;
-    LinMessage[5] = 0x00;
-    LinMessage[6] = 0x30;
-    LinMessage[7] = 0x00;
-
-
-    
-    uint8_t cksum = getChecksum(0x00, dataLen);
-    for (int i = 0; i < dataLen; ++i)
-    {
-        HardwareSerial::write(LinMessage[i]); // Message (array from 1..8)
-    }
-    HardwareSerial::write(cksum);
-    HardwareSerial::flush();
-    //delay(10);
-    return ChecksumValid;
-} 
-
 
 /// @brief write a complete LIN2.0 frame without request of data to the lin-bus
 /// @details write LIN Frame (Break, Synk, PID, Data, Checksum) to the Bus, and hope somebody will read this

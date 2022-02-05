@@ -80,3 +80,17 @@ void ShiftRegService::setPin(byte data)
   //shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, data);
   digitalWrite(PIN_STORE, HIGH);
 }
+
+
+
+void ShiftRegService::setNumber(byte key) {
+  this->update(
+      [&](ShiftRegState& state) {
+        if (state.pin == key) {
+          return StateUpdateResult::UNCHANGED;
+        }        
+        state.pin = key;
+        return StateUpdateResult::CHANGED;
+      },
+      "setkeymethod");
+}

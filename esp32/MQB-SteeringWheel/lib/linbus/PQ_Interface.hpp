@@ -6,9 +6,6 @@
 #include "Lin_Interface.hpp"
 #include <Arduino.h>
 
-
-
-
 #define IDNAME(name) #name
 
 #define PQ_BUTTONS_ID 0x0E
@@ -70,9 +67,10 @@ const char static* PQKeyNames[] = {
 
 class PQ_Interface {
  public:
-  PQ_Interface() : LinBus(1){
+  PQ_Interface() :
+      LinBus(1){
 
-  };
+      };
   void setup();
   void loop();
   uint8_t getTemp();
@@ -91,7 +89,9 @@ class PQ_Interface {
   Lin_Interface LinBus;
   bool verboseMode = true;
 
-  int write_response(uint8_t ident, uint8_t data[], uint8_t data_size);
+  void processRequest(uint8_t protectedId);
+  uint8_t getChecksum(uint8_t ProtectedID, uint8_t* data, uint8_t dataLen);
+  void writeResponse(uint8_t protectedId, uint8_t* data, uint8_t datalen);
 
  private:
   enum {

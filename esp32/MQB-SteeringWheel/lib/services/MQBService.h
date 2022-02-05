@@ -32,6 +32,7 @@ class MQBService : public StatefulService<MQBState> {
   MQBService(AsyncWebServer* server,
                     SecurityManager* securityManager);
   void begin();
+  void setKey(byte key);
 
  private:
   HttpEndpoint<MQBState> _httpEndpoint;
@@ -40,6 +41,7 @@ class MQBService : public StatefulService<MQBState> {
 
   void registerConfig();
   void onConfigUpdated();
+
 };
 
 #endif
