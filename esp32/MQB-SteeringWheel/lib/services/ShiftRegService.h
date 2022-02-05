@@ -6,7 +6,7 @@
 #include <MqttPubSub.h>
 #include <WebSocketTxRx.h>
 
-#define DEFAULT_SHIFTREG_STATE 1
+#define DEFAULT_SHIFTREG_STATE 0
 #define PIN_LATCH 16 // SHIFT_SHCP
 #define PIN_CLOCK 17 // SHIFT_STCP
 #define PIN_DATA 18 // SHIFT_DS

@@ -1,4 +1,7 @@
 #include <ShiftRegService.h>
+// PQ35 Tempomat:
+// Verzögern = 	Zwischen 460 ohm und 	1300 Ohm - 1.3V - 
+// Beschleunigen = 	Zwischen 1.5k und	4.3k Ohm - 2.6v
 
 ShiftRegService::ShiftRegService(AsyncWebServer* server,
                                      SecurityManager* securityManager) :

@@ -5,14 +5,10 @@
 #pragma once
 #include "Lin_Interface.hpp"
 #include <Arduino.h>
-//#define LIN_TX 32
-//#define LIN_RX 33
-
-#define LIN_TX 25
-#define LIN_RX 26
 
 #define IDNAME(name) #name
-
+//#include <map>
+//std::map<char,int> first;
 enum MQBKeys
 {
     // From Top to bottom and left to right:
@@ -92,7 +88,8 @@ public:
     void setup();
     void loop();
     void getLastKeyCode();
-    
+
+    uint8_t getTemp();
 
     static String getKeyName(byte key);
     byte getLastKey();
@@ -105,4 +102,5 @@ protected:
     MQBKeys lastKeyPressed;
     void dumpBuffer();
     uint8_t lightValue = 255;
+    uint8_t temp = 0;
 };

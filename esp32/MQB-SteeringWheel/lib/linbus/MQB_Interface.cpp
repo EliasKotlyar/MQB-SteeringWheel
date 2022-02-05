@@ -4,32 +4,29 @@
 void MQB_Interface::setup(void)
 {
   LinBus.baud = 19200;
-  LinBus.pin_rx = LIN_RX;
-  LinBus.pin_tx = LIN_TX;
-  LinBus.verboseMode = -1;
+  LinBus.pin_rx = LIN2_RX;
+  LinBus.pin_tx = LIN2_TX;
+  LinBus.verboseMode = 1;
 }
 
 void MQB_Interface::loop(void)
 {
   lastKeyPressed = MQB_NONE;
   readLinData(0x0E);
-  readLinData(0x0F);
+  //readLinData(0x0F);
+  //readLinData(0x3A);
 
-  if (lastKeyPressed == MQB_UP)
-  {
-    Serial.printf("Value : %d \n", lightValue);
-    lightValue = lightValue + 10;
-  }
-  if (lastKeyPressed == MQB_DOWN)
-  {
-    Serial.printf("Value : %d \n", lightValue);
-    lightValue = lightValue - 10;
-  }
-
+  // See : https://petrosprojects.blogspot.com/?view=sidebar
   // Send Lin Data:
+  // 0x00 = Light off
+  // 0x06 = Light with Engine on
+  // 0x06 to 0x5C = Backlight dimming
   LinBus.LinMessage[0] = lightValue;
+  // FF = Engine running, FE not running  
   LinBus.LinMessage[1] = 0xFF;
-  LinBus.LinMessage[2] = 0xDC;
+  // Brightness SwitchPOsition -> 0x86 to 0xDC dimming range
+  LinBus.LinMessage[2] = 0x86;
+  // Static value:
   LinBus.LinMessage[3] = 0x7F;
   LinBus.writeFrame(0x0D, 4);
 }
@@ -87,6 +84,11 @@ void MQB_Interface::readLinData(uint8_t frameId)
     {
       lastKeyPressed = MQB_HORN;
     }
+    // Special Treatment of Temp Message:
+    if (frameId == 0x3A)
+    {
+      this->temp = LinBus.LinMessage[0];
+    }
   }
 }
 bool MQB_Interface::hasKeysPressed()
@@ -103,4 +105,8 @@ String MQB_Interface::getKeyName(byte key)
 {
   String name = MQBKeyNames[key];
   return name;
+}
+
+uint8_t MQB_Interface::getTemp(){
+  return this->temp;
 }

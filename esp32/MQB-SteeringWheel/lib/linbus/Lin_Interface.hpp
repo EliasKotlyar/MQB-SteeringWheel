@@ -14,6 +14,14 @@
 
 #include <Arduino.h>
 
+#define LIN1_TX 32 
+#define LIN1_RX 33
+
+#define LIN2_TX 25
+#define LIN2_RX 26
+
+
+
 class Lin_Interface : private HardwareSerial
 {
 public:
@@ -29,6 +37,7 @@ public:
     uint8_t LinMessage[8 + 1 + 4] = {0};
 
     bool readFrame(uint8_t FrameID);
+    bool readFrame(void);
 
     void writeFrame(uint8_t FrameID, uint8_t datalen);
     void writeFrameClassic(uint8_t FrameID, uint8_t datalen);

@@ -12,23 +12,16 @@
 class MQBState {
  public:
   int lastKeyPressed;
+  int temp;
 
   static void read(MQBState& settings, JsonObject& root) {
 
     String keyStr = MQB_Interface::getKeyName(settings.lastKeyPressed);
     root["lastKeyPressed"] = keyStr;
+    root["temp"] = settings.temp;
   }
 
   static StateUpdateResult update(JsonObject& root, MQBState& MQBState) {
-    // No Change
-    return StateUpdateResult::UNCHANGED;
-  }
-
-  static void haRead(MQBState& settings, JsonObject& root) {
-    root["lastKeyPressed"] = settings.lastKeyPressed;
-  }
-
-  static StateUpdateResult haUpdate(JsonObject& root, MQBState& MQBState) {
     // No Change
     return StateUpdateResult::UNCHANGED;
   }
