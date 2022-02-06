@@ -17,6 +17,11 @@ MQBService mqbStateService = MQBService(&server, esp8266React.getSecurityManager
 ShiftRegService shiftRegService = ShiftRegService(&server, esp8266React.getSecurityManager());
 DebugService debugService = DebugService(&server, esp8266React.getSecurityManager());
 
+
+void pqLoop(void* parameter) {
+  pq.loop();
+}
+
 void setup() {
   // start serial and filesystem
   Serial.begin(SERIAL_BAUD_RATE);
@@ -41,13 +46,20 @@ void setup() {
   pq.setup();
   mqb.setup();
   randomSeed(0);
+  xTaskCreate(pqLoop,        // Function that should be called
+              "Toggle LED",  // Name of the task (for debugging)
+              1000,          // Stack size (bytes)
+              NULL,          // Parameter to pass
+              1,             // Task priority
+              NULL           // Task handle
+  );
 }
+
 
 void loop() {
   // run the framework's loop function
   esp8266React.loop();
   mqb.loop();
-  // pq.loop();
 
   byte key = MQB_NONE;
   if (mqb.hasKeysPressed()) {
@@ -59,7 +71,7 @@ void loop() {
   }
   if (key == MQB_PLUS) {
     keyNumber = 7;
-  }  
+  }
   shiftRegService.setNumber(keyNumber);
   mqbStateService.setKey(key);
 }

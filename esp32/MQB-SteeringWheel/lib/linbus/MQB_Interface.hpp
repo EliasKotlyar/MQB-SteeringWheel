@@ -3,6 +3,9 @@
 // Provides a Interface to MQB Steering Wheel
 
 #pragma once
+#ifndef MQB_Interface_h
+#define MQB_Interface_h
+
 #include "Lin_Interface.hpp"
 #include <Arduino.h>
 
@@ -106,3 +109,4 @@ protected:
     uint8_t lightValue = 255;
     uint8_t temp = 0;
 };
+#endif

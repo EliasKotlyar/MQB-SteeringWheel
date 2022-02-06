@@ -12,10 +12,10 @@ void PQ_Interface::setup() {
   buttons_response[6] = 0x30;
   buttons_response[7] = 0x00;
   // Light Data:
-  light_data[0] = 0x00;
-  light_data[1] = 0xF9;
-  light_data[2] = 0xFF;
-  light_data[3] = 0xFF;
+  light_data[0] = 0x76;
+  light_data[1] = 0x00;
+  light_data[2] = 0xEF;
+  light_data[3] = 0xFC;
 
   // Lin
   LinBus.baud = 19200;
@@ -24,6 +24,10 @@ void PQ_Interface::setup() {
   LinBus.verboseMode = 1;
 
   // Serial.println("\nPQ init");
+  
+
+
+
 }
 
 void PQ_Interface::loop() {
@@ -50,14 +54,16 @@ void PQ_Interface::loop() {
             case 1:
               if (currentData != 0) {
                 if (LinBus.verboseMode == 1) {
-                  Serial.println("Discarding Frame, because of invalid header");
+                  Serial.println("Discarding Frame, because of invalid header(0)");
+                  //Serial.println(currentData);
                 }
               }
               break;
             case 2:
               if (currentData != 0x55) {
                 if (LinBus.verboseMode == 1) {
-                  Serial.println("Discarding Frame, because of invalid header");
+                  Serial.println("Discarding Frame, because of invalid header(0x55)");
+                  //Serial.println(currentData);
                 }
               }
               break;
@@ -129,9 +135,15 @@ void PQ_Interface::processRequest(uint8_t protectedId) {
 // Writes a response back to PQ
 void PQ_Interface::writeResponse(uint8_t protectedId, uint8_t* data, uint8_t dataLen) {
   //Serial.printf("%02X ", protectedId);
+  //Serial.println();
+  byte protectedId2 = protectedId & 0b00111111;
+
+  //Serial.printf("%02X ", protectedId2);
+  //Serial.println();
+  return;
   //data[2] = random(100, 255);
   for (int i = 0; i < dataLen; ++i) {
-    data[i] = random(0, 255);    
+    //data[i] = random(0, 255);    
     //data[i] = random(0, 255);
     //Serial.printf("%02X ", data[i]);
   }

@@ -6,6 +6,11 @@ void MQB_Interface::setup(void) {
   LinBus.pin_rx = LIN2_RX;
   LinBus.pin_tx = LIN2_TX;
   LinBus.verboseMode = -1;
+
+
+
+
+
 }
 
 void MQB_Interface::loop(void) {
