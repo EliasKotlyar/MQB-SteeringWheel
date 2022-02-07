@@ -5,65 +5,11 @@
 #pragma once
 #include "Lin_Interface.hpp"
 #include <Arduino.h>
-
+#include <map>
 #define IDNAME(name) #name
 
 #define PQ_BUTTONS_ID 0x0E
 #define PQ_LIGHT_ID 0x0D
-
-enum PQKeys {
-  PQ_Prev,
-  PQ_Next,
-  PQ_PhoneVoiceMic,
-  PQ_Phone,
-  PQ_View,
-  PQ_Up,
-  PQ_Down,
-  PQ_SrcMinus,
-  PQ_SrcPlus,
-  PQ_OK,
-  PQ_VOL_PLUS,
-  PQ_VOL_MINUS,
-  PQ_ACC,
-  // No Key pressed:
-  PQ_NONE
-};
-const uint8_t PQKeyCodes[] = {
-    0x16,  // prev
-    0x15,  // next
-    0x19,  // phone <- voice/mic
-    0x1C,  // phone
-    0x23,  // return <- view (on wheels with "view" button)
-    0x04,  // up
-    0x05,  // down
-    0x03,  // src-
-    0x02,  // src+
-    0x07,  // ok
-    0x10,  // vol+
-    0x11,  // vol-
-    0x0C,  // voice/mic <- ACC mode (on wheels with "view" button)
-    0x00,  // None
-};
-
-const char static* PQKeyNames[] = {
-
-    // No Key pressed:
-    IDNAME(PQ_Prev),
-    IDNAME(PQ_Next),
-    IDNAME(PQ_PhoneVoiceMic),
-    IDNAME(PQ_Phone),
-    IDNAME(PQ_View),
-    IDNAME(PQ_Up),
-    IDNAME(PQ_Down),
-    IDNAME(PQ_SrcMinus),
-    IDNAME(PQ_SrcPlus),
-    IDNAME(PQ_OK),
-    IDNAME(PQ_VOL_PLUS),
-    IDNAME(PQ_VOL_MINUS),
-    IDNAME(PQ_ACC),
-    IDNAME(PQ_NONE),
-
-};
 
 class PQ_Interface {
  public:
@@ -77,7 +23,7 @@ class PQ_Interface {
 
  protected:
   void readLinData(uint8_t frameId);
-  PQKeys lastKeyPressed;
+  String lastKeyPressed;
   void dumpBuffer();
   uint8_t lightValue = 255;
   uint8_t temp = 0;
@@ -107,4 +53,19 @@ class PQ_Interface {
   uint8_t request_data_index = 0;
   uint8_t buttons_response[8];
   unsigned long request_time = 0;
+
+  std::map<String, byte> pqKeyArray = {
+
+      {"PQ_PREV", 0x16},
+      {"PQ_Next", 0x15},
+      {"PQ_PhoneVoiceMic", 0x19},
+      {"PQ_Phone", 0x1C},
+      {"PQ_View", 0x23},
+      {"PQ_Up", 0x04},
+      {"PQ_Down", 0x05},
+      {"PQ_SrcMinus", 0x02},
+      {"PQ_SrcPlus", 0x07},
+
+
+  };
 };

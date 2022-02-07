@@ -20,7 +20,7 @@ MQBService::MQBService(AsyncWebServer* server, SecurityManager* securityManager)
 }
 
 void MQBService::begin() {
-  _state.lastKeyPressed = MQB_NONE;
+  _state.lastKeyPressed = "MQB_NONE";
   onConfigUpdated();
 }
 
@@ -31,15 +31,15 @@ void MQBService::onConfigUpdated() {
 void MQBService::registerConfig() {
 }
 
-void MQBService::setKey(byte key) {
+void MQBService::setKey(String key) {
   this->update(
       [&](MQBState& state) {
         if (state.lastKeyPressed == key) {
           return StateUpdateResult::UNCHANGED;
         }
-        if (key != MQB_NONE) {
-          String keyStr = MQB_Interface::getKeyName(key);
-          Serial.println("Key Pressed " + keyStr);
+        if (key != "MQB_NONE") {
+  
+          Serial.println("Key Pressed " + key);
         }
         state.lastKeyPressed = key;
         return StateUpdateResult::CHANGED;
