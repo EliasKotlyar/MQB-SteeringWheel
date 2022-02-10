@@ -5,9 +5,9 @@
 #include <ESP8266React.h>
 #include <LightStateService.h>
 #include <MQBService.h>
-#include <MQB_Interface.hpp>
+#include <Lin_Interface.h>
 #include <ShiftRegService.h>
-#include <PQ_Interface.hpp>
+#include <PQ_Interface.h>
 #include <DebugService.h>
 #include <ConfigService.h>
 #include <TempService.h>
@@ -15,9 +15,23 @@
 #define LIN_SLP 13
 class ServiceManager {
  public:
-  void startServices();
+  void loop();
+  void setup();
 
  private:
-  MQB_Interface mqb;
-  PQ_Interface pq;
+  Lin_Interface Lin1 = Lin_Interface(1);
+  Lin_Interface Lin2 = Lin_Interface(2);
+
+  // All Services:
+  AsyncWebServer server = AsyncWebServer(80);
+  ESP8266React esp8266React = ESP8266React(&server);
+  LightStateService lightStateService = LightStateService(&server, esp8266React.getSecurityManager());
+
+  ShiftRegService shiftRegService = ShiftRegService(&server, esp8266React.getSecurityManager());
+  DebugService debugService = DebugService(&server, esp8266React.getSecurityManager());
+  TempService tempService = TempService(&server, esp8266React.getSecurityManager());
+  ConfigService configService = ConfigService(&server, esp8266React.getSecurityManager(), esp8266React.getFS());
+
+  // Service:
+  MQBService mqbStateService = MQBService(&server, esp8266React.getSecurityManager(), &Lin2);
 };

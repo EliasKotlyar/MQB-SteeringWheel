@@ -6,7 +6,7 @@
 // Copyright mestrode <ardlib@mestro.de>
 // Original Source: "https://github.com/mestrode/Lin-Interface-Library"
 
-#include "Lin_Interface.hpp"
+#include "Lin_Interface.h"
 
 #include <Arduino.h>
 
@@ -292,4 +292,12 @@ uint8_t Lin_Interface::getChecksum(uint8_t ProtectedID, uint8_t dataLen)
         sum = (sum & 0xFF) + (sum >> 8);
     // inverting result
     return (~sum);
+}
+
+void Lin_Interface::dumpBuffer() {
+  for (uint8_t i = 0; i < 8; i++) {
+    Serial.printf("%02X ", LinMessage[i]);
+  }
+  Serial.println();
+  delay(1000);
 }

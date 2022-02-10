@@ -1,14 +1,6 @@
 #include <ServiceManager.h>
 
-void ServiceManager::startServices() {
-  AsyncWebServer server(80);
-  ESP8266React esp8266React(&server);
-  LightStateService lightStateService = LightStateService(&server, esp8266React.getSecurityManager());
-  MQBService mqbStateService = MQBService(&server, esp8266React.getSecurityManager());
-  ShiftRegService shiftRegService = ShiftRegService(&server, esp8266React.getSecurityManager());
-  DebugService debugService = DebugService(&server, esp8266React.getSecurityManager());
-  TempService tempService = TempService(&server, esp8266React.getSecurityManager());
-  ConfigService configService = ConfigService(&server, esp8266React.getSecurityManager(), esp8266React.getFS());
+void ServiceManager::setup() {
   // start serial and filesystem
   Serial.begin(SERIAL_BAUD_RATE);
 
@@ -24,13 +16,28 @@ void ServiceManager::startServices() {
   // start the server
   server.begin();
 
-  // Setup the PQ and MQB Interfaces:
-  pq.setup();
-  mqb.setup();
   // mqb.setup();
 
   pinMode(LIN_SLP, OUTPUT);
   digitalWrite(LIN_SLP, HIGH);
 
   randomSeed(0);
+}
+
+void ServiceManager::loop() {
+  esp8266React.loop();
+  mqbStateService.loop();
+
+  // String key = mqb.getLastKey();
+  /*
+  byte keyNumber = 0;
+  if (key == "MQB_MINUS") {
+    keyNumber = 6;
+  }
+  if (key == "MQB_PLUS") {
+    keyNumber = 7;
+  }
+  shiftRegService.setNumber(keyNumber);
+  */
+  // mqbStateService.setKey(key);
 }

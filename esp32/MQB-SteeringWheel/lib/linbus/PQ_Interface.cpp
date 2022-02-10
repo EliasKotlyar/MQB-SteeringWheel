@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "PQ_Interface.hpp"
+#include "PQ_Interface.h"
 
 
 void PQ_Interface::setup() {

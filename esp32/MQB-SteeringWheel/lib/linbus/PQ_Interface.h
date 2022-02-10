@@ -3,7 +3,7 @@
 // Provides a Interface to PQ Steering Wheel
 
 #pragma once
-#include "Lin_Interface.hpp"
+#include <Lin_Interface.h>
 #include <Arduino.h>
 #include <map>
 //#include <ServiceManager.h>

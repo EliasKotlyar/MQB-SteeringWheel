@@ -1,7 +1,6 @@
 #ifndef ConfigService_h
 #define ConfigService_h
 
-#include <MQB_Interface.hpp>
 #include <HttpEndpoint.h>
 #include <MqttPubSub.h>
 #include <WebSocketTxRx.h>
