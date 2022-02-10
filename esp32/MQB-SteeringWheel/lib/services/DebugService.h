@@ -10,9 +10,11 @@
 class DebugState {
  public:
   bool enabled = false;
+  int protectedId;
 
   static void read(DebugState& settings, JsonObject& root) {
     root["enabled"] = settings.enabled;
+    root["protectedId"] = settings.protectedId;
   }
 
   static StateUpdateResult update(JsonObject& root, DebugState& DebugState) {
@@ -29,13 +31,15 @@ class DebugService : public StatefulService<DebugState> {
  public:
   DebugService(AsyncWebServer* server, SecurityManager* securityManager);
   void begin();
-
+  void addLinMessage(byte protectedId, byte* buffer, byte bufferlen);
+  
  private:
   HttpEndpoint<DebugState> _httpEndpoint;
   WebSocketTxRx<DebugState> _webSocket;
 
   void registerConfig();
   void onConfigUpdated();
+  
 };
 
 #endif

@@ -15,3 +15,7 @@ export interface MQBState {
 export interface ShiftRegState {
   pin: number;
 }
+
+export interface ConfigData {
+  mapping: object
+}

@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "PQ_Interface.hpp"
 
+
 void PQ_Interface::setup() {
   // Button Data:
   buttons_response[0] = 0xFF;
@@ -21,13 +22,9 @@ void PQ_Interface::setup() {
   LinBus.baud = 19200;
   LinBus.pin_rx = LIN1_RX;
   LinBus.pin_tx = LIN1_TX;
-  LinBus.verboseMode = 1;
+  LinBus.verboseMode = 0;
 
   // Serial.println("\nPQ init");
-  
-
-
-
 }
 
 void PQ_Interface::loop() {
@@ -55,16 +52,18 @@ void PQ_Interface::loop() {
               if (currentData != 0) {
                 if (LinBus.verboseMode == 1) {
                   Serial.println("Discarding Frame, because of invalid header(0)");
-                  //Serial.println(currentData);
+                  // Serial.println(currentData);
                 }
+                currentPosition = 0;
               }
               break;
             case 2:
               if (currentData != 0x55) {
                 if (LinBus.verboseMode == 1) {
                   Serial.println("Discarding Frame, because of invalid header(0x55)");
-                  //Serial.println(currentData);
+                  // Serial.println(currentData);
                 }
+                currentPosition = 0;
               }
               break;
             case 3:
@@ -126,28 +125,29 @@ uint8_t PQ_Interface::getChecksum(uint8_t ProtectedID, uint8_t* data, uint8_t da
 // Response Handler:
 void PQ_Interface::processRequest(uint8_t protectedId) {
   if (protectedId == 0xF0) {
-    //writeResponse(protectedId, buttons_response, 8);
+    // writeResponse(protectedId, buttons_response, 8);
   }
   if (protectedId == 0x61) {
-    writeResponse(protectedId, light_data, 4);
+    // writeResponse(protectedId, light_data, 4);
   }
+  //debugService.addLinMessage(protectedId, 0, 0);
 }
 // Writes a response back to PQ
 void PQ_Interface::writeResponse(uint8_t protectedId, uint8_t* data, uint8_t dataLen) {
-  //Serial.printf("%02X ", protectedId);
-  //Serial.println();
+  // Serial.printf("%02X ", protectedId);
+  // Serial.println();
   byte protectedId2 = protectedId & 0b00111111;
 
-  //Serial.printf("%02X ", protectedId2);
-  //Serial.println();
+  // Serial.printf("%02X ", protectedId2);
+  // Serial.println();
   return;
-  //data[2] = random(100, 255);
+  // data[2] = random(100, 255);
   for (int i = 0; i < dataLen; ++i) {
-    //data[i] = random(0, 255);    
-    //data[i] = random(0, 255);
-    //Serial.printf("%02X ", data[i]);
+    // data[i] = random(0, 255);
+    // data[i] = random(0, 255);
+    // Serial.printf("%02X ", data[i]);
   }
-  //Serial.println();
+  // Serial.println();
 
   uint8_t cksum = getChecksum(0x00, data, dataLen);
   for (int i = 0; i < dataLen; ++i) {
@@ -156,4 +156,3 @@ void PQ_Interface::writeResponse(uint8_t protectedId, uint8_t* data, uint8_t dat
   LinBus.write(cksum);
   LinBus.flush();
 }
-

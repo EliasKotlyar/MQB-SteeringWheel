@@ -11,19 +11,28 @@
 #define CONFIG_SETTINGS_FILE "/config/config.json"
 class ConfigState {
  public:
-  int pin;
+  String config;
+  DynamicJsonDocument jsonDocument = DynamicJsonDocument(2000);
 
   static void read(ConfigState& settings, JsonObject& root) {
-    root["pin"] = settings.pin;
+    JsonObjectConst object = settings.jsonDocument.to<JsonObject>();
+    root.set(object);
   }
 
-  static StateUpdateResult update(JsonObject& root, ConfigState& ConfigState) {
-    int newState = root["pin"];
-    if (ConfigState.pin != newState) {
-      ConfigState.pin = newState;
-      return StateUpdateResult::CHANGED;
-    }
-    return StateUpdateResult::UNCHANGED;
+  static StateUpdateResult update(JsonObject& root, ConfigState& settings) {
+    Serial.println("Got Update");
+
+    // configState.config = root;
+    // serializeJson(configState.config, Serial);
+
+    // JsonObject root = jsonDocument.to<JsonObject>();
+    // deserializeJson(root, settings.config,2000);
+    settings.jsonDocument.set(root);
+    // Send to Serial:
+    serializeJson(settings.jsonDocument, Serial);
+
+
+    return StateUpdateResult::CHANGED;
   }
 };
 

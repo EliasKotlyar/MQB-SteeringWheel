@@ -3,6 +3,7 @@ import { Navigate, Routes, Route } from 'react-router-dom';
 
 import DemoProject from './DemoProject';
 import StatusTab from './StatusTab';
+import ConfigTab from "./ConfigTab";
 
 const ProjectRouting: FC = () => {
   return (
@@ -16,6 +17,7 @@ const ProjectRouting: FC = () => {
       }
       <Route path="demo/*" element={<DemoProject />} />
       <Route path="status/*" element={<StatusTab />} />
+      <Route path="config/*" element={<ConfigTab />} />
     </Routes>
   );
 };

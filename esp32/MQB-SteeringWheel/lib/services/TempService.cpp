@@ -28,21 +28,17 @@ TempService::TempService(AsyncWebServer* server, SecurityManager* securityManage
 }
 
 void TempService::begin() {
-  _state.pin = DEFAULT_Temp_STATE;
-  onConfigUpdated();
+  _state.enabled = 0;
+  _state.adc_sampling_freq = 1000;
 }
 
-void TempService::registerConfig() {
+void TempService::loop() {
+  int startTime = 0;
+  while (1) {
+    delay(_state.adc_sampling_freq);
+    _state.adc_value = analogRead(SHZ_CS);
+  }
 }
-
-void TempService::setNumber(byte key) {
-  this->update(
-      [&](TempState& state) {
-        if (state.pin == key) {
-          return StateUpdateResult::UNCHANGED;
-        }
-        state.pin = key;
-        return StateUpdateResult::CHANGED;
-      },
-      "setkeymethod");
+void TempService::onConfigUpdated() {
+  digitalWrite(SHZ_INP, _state.enabled);
 }

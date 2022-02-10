@@ -20,11 +20,11 @@ ConfigService::ConfigService(AsyncWebServer* server, SecurityManager* securityMa
   // configure settings service update handler to update LED state
   addUpdateHandler(
       [&](const String& originId) {
-        // Serial.print("Updated State from ");
-        // Serial.print(originId);
-        // Serial.println();
+         Serial.print("Updated State from ");
+         Serial.print(originId);
+         Serial.println();
 
-        onConfigUpdated();
+        //onConfigUpdated();
       },
       false);
 }

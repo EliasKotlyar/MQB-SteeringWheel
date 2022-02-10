@@ -34,6 +34,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
     }
     setSaving(true);
     setErrorMessage(undefined);
+    console.log(toSave)
     try {
       setData((await update(toSave)).data);
       enqueueSnackbar("Update successful", { variant: 'success' });
@@ -47,6 +48,7 @@ export const useRest = <D>({ read, update }: RestRequestOptions<D>) => {
   }, [update, enqueueSnackbar]);
 
   const saveData = () => data && save(data);
+  //const saveData = (data2:<D>) => data2 && save(data2);
 
   useEffect(() => {
     loadData();

@@ -6,21 +6,27 @@
 #include <MqttPubSub.h>
 #include <WebSocketTxRx.h>
 
-#define DEFAULT_Temp_STATE 0
+#define SHZ_CS 27 
+#define SHZ_ENABLE 21 // Diag PIN
+#define SHZ_INP 19 // ON/OFf Pin
 
 
 class TempState {
  public:
-  int pin;
+  byte enabled;
+  int adc_value; 
+  int adc_sampling_freq;
+
 
   static void read(TempState& settings, JsonObject& root) {
-    root["pin"] = settings.pin;
+    root["enabled"] = settings.enabled;
+    root["adc_value"] = settings.adc_value;
   }
 
   static StateUpdateResult update(JsonObject& root, TempState& TempState) {
-    int newState = root["pin"];
-    if (TempState.pin != newState) {
-      TempState.pin = newState;
+    byte newState = root["enabled"];
+    if (TempState.enabled != newState) {
+      TempState.enabled = newState;
       return StateUpdateResult::CHANGED;
     }
     return StateUpdateResult::UNCHANGED;
@@ -37,10 +43,8 @@ class TempService : public StatefulService<TempState> {
   HttpEndpoint<TempState> _httpEndpoint;
   WebSocketTxRx<TempState> _webSocket;
 
-  void registerConfig();
-  void onConfigUpdated();
-  void triggerPin(byte pinNr);
-  void setPin(byte data);
+  void loop();
+  void onConfigUpdated();  
 };
 
 #endif

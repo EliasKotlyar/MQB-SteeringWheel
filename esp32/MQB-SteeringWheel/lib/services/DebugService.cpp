@@ -1,7 +1,6 @@
 #include <DebugService.h>
 
-DebugService::DebugService(AsyncWebServer* server,
-                                     SecurityManager* securityManager) :
+DebugService::DebugService(AsyncWebServer* server, SecurityManager* securityManager) :
     _httpEndpoint(DebugState::read,
                   DebugState::update,
                   this,
@@ -15,9 +14,7 @@ DebugService::DebugService(AsyncWebServer* server,
                server,
                "/ws/DebugState",
                securityManager,
-               AuthenticationPredicates::IS_AUTHENTICATED)
- {
-
+               AuthenticationPredicates::IS_AUTHENTICATED) {
   // configure settings service update handler to update LED state
   addUpdateHandler([&](const String& originId) { onConfigUpdated(); }, false);
 }
@@ -31,6 +28,12 @@ void DebugService::onConfigUpdated() {
   // Calls if value updates
 }
 
-void DebugService::registerConfig() {
- 
+void DebugService::addLinMessage(byte protectedId, byte* buffer, byte bufferlen) {
+  this->update(
+      [&](DebugState& state) {
+        state.protectedId = protectedId;
+
+        return StateUpdateResult::CHANGED;
+      },
+      "setkeymethod");
 }

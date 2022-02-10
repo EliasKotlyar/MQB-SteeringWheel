@@ -51,6 +51,7 @@ export const useWs = <D>(wsUrl: string, wsThrottle: number = 100) => {
     if (clearData) {
       setData(undefined);
     }
+    console.log(newData);
     ws.current.json(newData);
   }, []);
 
@@ -87,5 +88,5 @@ export const useWs = <D>(wsUrl: string, wsThrottle: number = 100) => {
     return instance.close;
   }, [wsUrl, onMessage]);
 
-  return { connected, data, updateData } as const;
+  return { connected, data, updateData ,setData ,setTransmit } as const;
 };
