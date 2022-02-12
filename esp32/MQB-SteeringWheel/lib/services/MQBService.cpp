@@ -57,7 +57,7 @@ void MQBService::loop(void) {
   // Static value:
   LinBus->LinMessage[3] = 0x7F;
   LinBus->writeFrame(0x0D, 4);
-  this->setKey(this->lastKeyPressed);
+  this->setKey(lastKeyPressed);
 }
 
 void MQBService::checkLastKey(byte linKey) {

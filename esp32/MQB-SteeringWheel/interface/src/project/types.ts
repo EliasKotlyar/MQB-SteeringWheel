@@ -1,21 +1,27 @@
 export interface LightState {
-  led_on: boolean;
+    led_on: boolean;
 }
 
 export interface LightMqttSettings {
-  unique_id: string;
-  name: string;
-  mqtt_path: string;
+    unique_id: string;
+    name: string;
+    mqtt_path: string;
 }
 
 export interface MQBState {
-  lastKeyPressed: string;
+    lastKeyPressed: string;
 }
 
 export interface ShiftRegState {
-  pin: number;
+    pin: number;
 }
 
 export interface ConfigData {
-  mapping: object
+    mapping: object
+}
+
+export interface DebugState {
+    enabled: boolean;
+    protectedId: string;
+    buffer: string;
 }

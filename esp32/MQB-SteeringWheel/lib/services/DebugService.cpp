@@ -15,25 +15,23 @@ DebugService::DebugService(AsyncWebServer* server, SecurityManager* securityMana
                "/ws/DebugState",
                securityManager,
                AuthenticationPredicates::IS_AUTHENTICATED) {
-  // configure settings service update handler to update LED state
-  addUpdateHandler([&](const String& originId) { onConfigUpdated(); }, false);
 }
 
 void DebugService::begin() {
-  _state.enabled = false;
-  onConfigUpdated();
+  _state.enabled = true;
+  _state.bufferLen = 0;
 }
 
-void DebugService::onConfigUpdated() {
-  // Calls if value updates
+void DebugService::loop() {
 }
 
 void DebugService::addLinMessage(byte protectedId, byte* buffer, byte bufferlen) {
   this->update(
       [&](DebugState& state) {
         state.protectedId = protectedId;
-
+        memcpy(state.buffer, buffer, bufferlen);
+        state.bufferLen = bufferlen;
         return StateUpdateResult::CHANGED;
       },
-      "setkeymethod");
+      "addLinMessage");
 }

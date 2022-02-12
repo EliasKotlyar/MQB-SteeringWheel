@@ -28,12 +28,12 @@ class Lin_Interface : public HardwareSerial {
  public:
   // inherit constructor from HardwareSerial (Parameter: int uart_nr)
   Lin_Interface(int uart_nr) : HardwareSerial(uart_nr) {
-        if (uart_nr == 1) {
+    if (uart_nr == 1) {
       pin_rx = LIN1_RX;
-      pin_tx = LIN1_RX;
+      pin_tx = LIN1_TX;
     } else {
       pin_rx = LIN2_RX;
-      pin_tx = LIN2_RX;
+      pin_tx = LIN2_TX;
     }
   }
 
@@ -44,17 +44,24 @@ class Lin_Interface : public HardwareSerial {
 
   // 8 Data Bytes + ChkSum + some space for receiving complete frames
   uint8_t LinMessage[8 + 1 + 4] = {0};
+  byte bytes_received;
 
   bool readFrame(uint8_t FrameID);
 
   void writeFrame(uint8_t FrameID, uint8_t datalen);
   void writeFrameClassic(uint8_t FrameID, uint8_t datalen);
   void dumpBuffer();
+  byte readLinFrame();
+  void startSerial();
+  void writeResponse(byte protectedId, uint8_t* data, uint8_t datalen);
+  byte readLinHeader();
 
  protected:
   uint32_t m_bitCycles;
   size_t writeBreak();
   uint8_t getProtectedID(uint8_t FrameID);
   uint8_t getChecksum(uint8_t ProtectedID, uint8_t datalen);
-  
+
+  void processRequest(uint8_t protectedId);
+  uint8_t getChecksum(uint8_t ProtectedID, uint8_t* data, uint8_t dataLen);
 };

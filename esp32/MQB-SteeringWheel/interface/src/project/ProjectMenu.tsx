@@ -11,6 +11,7 @@ const ProjectMenu: FC = () => (
     <LayoutMenuItem icon={SettingsRemoteIcon} label="Demo" to={`/${PROJECT_PATH}/demo`} />
     <LayoutMenuItem icon={SettingsRemoteIcon} label="Status" to={`/${PROJECT_PATH}/status`} />
     <LayoutMenuItem icon={SettingsRemoteIcon} label="Config" to={`/${PROJECT_PATH}/config`} />
+    <LayoutMenuItem icon={SettingsRemoteIcon} label="Debug" to={`/${PROJECT_PATH}/debug`} />
   </List>
 );
 

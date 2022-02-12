@@ -7,7 +7,7 @@
 #include <MQBService.h>
 #include <Lin_Interface.h>
 #include <ShiftRegService.h>
-#include <PQ_Interface.h>
+#include <PQService.h>
 #include <DebugService.h>
 #include <ConfigService.h>
 #include <TempService.h>
@@ -17,6 +17,8 @@ class ServiceManager {
  public:
   void loop();
   void setup();
+  DebugService* getDebugService();
+  Lin_Interface* getLin1();
 
  private:
   Lin_Interface Lin1 = Lin_Interface(1);
@@ -34,4 +36,5 @@ class ServiceManager {
 
   // Service:
   MQBService mqbStateService = MQBService(&server, esp8266React.getSecurityManager(), &Lin2);
+  PQService pqStateService = PQService(&server, esp8266React.getSecurityManager(), &Lin1, &debugService);
 };

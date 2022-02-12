@@ -5,3 +5,5 @@ export * from './submit';
 export * from './time';
 export * from './useRest';
 export * from './useWs';
+export * from './useDebugWS';
+

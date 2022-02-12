@@ -7,12 +7,14 @@ void ServiceManager::setup() {
   // start the framework and demo project
   esp8266React.begin();
   // Load all the services:
-  mqbStateService.begin();
+
   shiftRegService.begin();
   debugService.begin();
   configService.begin();
   tempService.begin();
 
+  mqbStateService.begin();
+  pqStateService.begin();
   // start the server
   server.begin();
 
@@ -27,6 +29,7 @@ void ServiceManager::setup() {
 void ServiceManager::loop() {
   esp8266React.loop();
   mqbStateService.loop();
+  // pqStateService.loop();
 
   // String key = mqb.getLastKey();
   /*
@@ -41,3 +44,5 @@ void ServiceManager::loop() {
   */
   // mqbStateService.setKey(key);
 }
+
+
