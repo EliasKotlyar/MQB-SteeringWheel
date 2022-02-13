@@ -6,13 +6,15 @@
 #include <DebugService.h>
 #define DEFAULT_KEYPRESSED_STATE 0
 
+#ifndef PQService_h
+#define PQService_h
 class PQSlaveState {
  public:
-  String lastKeyPressed;
+  String keyPressed;
   int temp;
 
   static void read(PQSlaveState& settings, JsonObject& root) {
-    root["lastKeyPressed"] = settings.lastKeyPressed;
+    root["keyPressed"] = settings.keyPressed;
     root["temp"] = settings.temp;
   }
 
@@ -28,24 +30,20 @@ class PQSlave : public StatefulService<PQSlaveState> {
   void setup();
   void loop();
   void begin();
+  void setKey(String key);
 
  private:
+  // Funcs:
+  static void startTaskImpl(void* _this);
+  void processData(byte protectedId);
+  byte getKeyIDByName(String name);
+  // Vars:
   HttpEndpoint<PQSlaveState> _httpEndpoint;
   WebSocketTxRx<PQSlaveState> _webSocket;
   Lin_Interface* LinBus;
   DebugService* debugService;
 
-  void registerConfig();
-  void onConfigUpdated();
-
-  void readLinData(uint8_t frameId);
-  String lastKeyPressed;
-  void dumpBuffer();
-  uint8_t lightValue = 255;
-  uint8_t temp = 0;
-  void checkLastKey(byte linKey);
-  static void startTaskImpl(void* _this);
-
+  // Key Mappings
   std::map<String, byte> PQKeyArray = {
       // Left Side:
       {"PQ_VOL_PLUS", 0x06},
@@ -61,18 +59,10 @@ class PQSlave : public StatefulService<PQSlaveState> {
       {"PQ_NEXT", 0x0A},
       {"PQ_OK", 0x28},
       {"PQ_RET", 0x29},
+      {"PQ_NONE", 0x0},
   };
   uint8_t buttons_response[8] = {0xFF, 0x00, 0xFF, 0xF0, 0x60, 0x00, 0x30, 0x00};
   static const uint8_t BUTTONS_ID = 0x0E;
   static const uint8_t LIGHT_ID = 0x0D;
-  void getLastKeyCode();
-
-  uint8_t getTemp();
-
-  String getLastKey();
-  bool hasKeysPressed();
-  void setKey(String key);
-
-  void processData(byte protectedId);
-  byte getKeyIDByName(String name);
 };
+#endif

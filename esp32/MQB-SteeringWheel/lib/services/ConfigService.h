@@ -1,10 +1,12 @@
-#ifndef ConfigService_h
-#define ConfigService_h
+
 
 #include <HttpEndpoint.h>
 #include <MqttPubSub.h>
 #include <WebSocketTxRx.h>
 #include <FSPersistence.h>
+
+#include <MQBService.h>
+#include <PQSlave.h>
 #define DEFAULT_Config_STATE 0
 
 #define CONFIG_SETTINGS_FILE "/config/config.json"
@@ -19,7 +21,7 @@ class ConfigState {
   }
 
   static StateUpdateResult update(JsonObject& root, ConfigState& settings) {
-    //Serial.println("Got Update");
+    // Serial.println("Got Update");
 
     // configState.config = root;
     // serializeJson(configState.config, Serial);
@@ -28,8 +30,7 @@ class ConfigState {
     // deserializeJson(root, settings.config,2000);
     settings.jsonDocument.set(root);
     // Send to Serial:
-    //serializeJson(settings.jsonDocument, Serial);
-
+    // serializeJson(settings.jsonDocument, Serial);
 
     return StateUpdateResult::CHANGED;
   }
@@ -37,19 +38,17 @@ class ConfigState {
 
 class ConfigService : public StatefulService<ConfigState> {
  public:
-  ConfigService(AsyncWebServer* server, SecurityManager* securityManager, FS* fs);
+  ConfigService(AsyncWebServer* server, SecurityManager* securityManager, FS* fs, MQBService* mqb, PQSlave* pq);
   void begin();
-  void setNumber(byte key);
 
  private:
   HttpEndpoint<ConfigState> _httpEndpoint;
   WebSocketTxRx<ConfigState> _webSocket;
   FSPersistence<ConfigState> _fsPersistence;
 
-  void registerConfig();
-  void onConfigUpdated();
-  void triggerPin(byte pinNr);
-  void setPin(byte data);
+  MQBService* mqb;
+  PQSlave* pq;
+  String getMapping(String pqKeyNumber);
 };
 
-#endif
+

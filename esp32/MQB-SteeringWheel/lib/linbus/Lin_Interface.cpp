@@ -348,7 +348,7 @@ byte Lin_Interface::readLinHeader() {
   
   //Serial.println();
   // Read until timeout 50 ms (Idea from https://github.com/skpang/Teensy32_LIN-bus_slave_demo/blob/master/lin-bus.cpp)
-  while ((millis() - startTime) <= 50) {
+  while ((millis() - startTime) <= 20) {
     if (HardwareSerial::available()) {
       currentData = HardwareSerial::read();
       //Serial.printf("%02X ", currentData);
@@ -383,7 +383,7 @@ byte Lin_Interface::readLinHeader() {
     }
   }
   if(protectedId == 0){
-    Serial.println("Timeout!");
+    //Serial.println("Timeout!");
   }
   //
 

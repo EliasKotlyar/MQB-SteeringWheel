@@ -25,25 +25,24 @@ PQSlave::PQSlave(AsyncWebServer* server,
 
 void PQSlave::begin() {
   TaskHandle_t Core0TaskHnd;
-  _state.lastKeyPressed = "PQ_NONE";
+  _state.keyPressed = "PQ_NONE";
   // xTaskCreate(this->startTaskImpl, "PQTASK", 2048, this, 5, NULL );
   // Pin to Core 1, instead of 0 //
   // https://www.az-delivery.de/blogs/azdelivery-blog-fur-arduino-und-raspberry-pi/esp32-nutzung-beider-cpu-kerne-fuer-eigene-projekte
-  // xTaskCreatePinnedToCore(this->startTaskImpl, "PQTASK", 2048, this, 5, &Core0TaskHnd, 1);
 
-  LinBus->startSerial();
+  xTaskCreatePinnedToCore(this->startTaskImpl, "PQTASK", 2048, this, 5, &Core0TaskHnd, 1);
 }
 
 void PQSlave::setKey(String key) {
   this->update(
       [&](PQSlaveState& state) {
-        if (state.lastKeyPressed == key) {
+        if (state.keyPressed == key) {
           return StateUpdateResult::UNCHANGED;
         }
         if (key != "PQ_NONE") {
-          Serial.println("Key Pressed " + key);
+          Serial.println("PQ Key Pressed " + key);
         }
-        state.lastKeyPressed = key;
+        state.keyPressed = key;
         return StateUpdateResult::CHANGED;
       },
       "setkeymethod");
@@ -56,17 +55,15 @@ void PQSlave::startTaskImpl(void* _this) {
 void PQSlave::loop(void) {
   Serial.print("Application CPU is on core:");
   Serial.println(xPortGetCoreID());
-  const TickType_t xDelay = 50 / portTICK_PERIOD_MS;
-
+  LinBus->startSerial();
   while (1) {
     byte protectedID = LinBus->readLinHeader();
     if (protectedID != 0) {
       this->processData(protectedID);
-
-      // LinBus->dumpBuffer();
-      // Serial.println();
       // this->debugService->addLinMessage(protectedID, LinBus->LinMessage, LinBus->bytes_received);
     }
+    vTaskDelay(20 / portTICK_PERIOD_MS);
+    // rtc_wdt_feed();
   }
 }
 
@@ -77,19 +74,24 @@ void PQSlave::processData(byte protectedId) {
       // Serial.printf("%02X ", protectedId);
       // Serial.print("  ");
       //  Button Data:
-      // byte keyid = this->getKeyIDByName("PQ_PREV");
-
+      byte keyid = this->getKeyIDByName(_state.keyPressed);
+      if (keyid != 0) {
+        Serial.println(keyid);
+      }
       buttons_response[0] = 0xF0 | ((buttons_response[0] + 1) % 0x10);
       buttons_response[6] = 0 | 0x30;
+      buttons_response[1] = keyid;
       /*
        */
-      //buttons_response[1] = 0x07;
+      // buttons_response[1] = 0x07;
 
+      /*
       if (buttons_response[1] == 0x07) {
         buttons_response[1] = 0;
       } else {
         buttons_response[1] = 0x07;
       }
+      */
       /*
       for (uint8_t i = 0; i < 8; i++) {
         Serial.printf("%02X ", buttons_response[i]);
@@ -106,7 +108,6 @@ void PQSlave::processData(byte protectedId) {
       }
       Serial.println();
       */
-
       // LinBus->dumpBuffer();
       break;
     }
@@ -115,7 +116,6 @@ void PQSlave::processData(byte protectedId) {
       break;
     }
     default: {
-      
       break;
     }
 

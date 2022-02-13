@@ -33,10 +33,15 @@ class ServiceManager {
   ShiftRegService shiftRegService = ShiftRegService(&server, esp8266React.getSecurityManager());
   DebugService debugService = DebugService(&server, esp8266React.getSecurityManager());
   TempService tempService = TempService(&server, esp8266React.getSecurityManager());
-  ConfigService configService = ConfigService(&server, esp8266React.getSecurityManager(), esp8266React.getFS());
 
   // Service:
   MQBService mqbStateService = MQBService(&server, esp8266React.getSecurityManager(), &Lin2);
   PQSlave pqStateService = PQSlave(&server, esp8266React.getSecurityManager(), &Lin1, &debugService);
   PQMasterService pqmaster = PQMasterService(&server, esp8266React.getSecurityManager(), &Lin2);
+
+  ConfigService configService = ConfigService(&server,
+                                              esp8266React.getSecurityManager(),
+                                              esp8266React.getFS(),
+                                              &mqbStateService,
+                                              &pqStateService);
 };

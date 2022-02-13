@@ -4,7 +4,8 @@
 #include <WebSocketTxRx.h>
 #include <Lin_Interface.h>
 #define DEFAULT_KEYPRESSED_STATE 0
-
+#ifndef MQBService_h
+#define MQBService_h
 class MQBState {
  public:
   String lastKeyPressed;
@@ -73,3 +74,5 @@ class MQBService : public StatefulService<MQBState> {
   bool hasKeysPressed();
   void setKey(String key);
 };
+
+#endif
