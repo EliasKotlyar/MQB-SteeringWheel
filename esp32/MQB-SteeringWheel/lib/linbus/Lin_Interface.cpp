@@ -13,6 +13,9 @@
 void Lin_Interface::startSerial() {
   HardwareSerial::begin(baud, SERIAL_8N1, pin_rx, pin_tx);
 }
+void Lin_Interface::stopSerial() {
+  HardwareSerial::end();
+}
 
 /// @brief reads data from a lin device by requesting a specific FrameID
 /// @details Start frame and read answer from bus device
@@ -68,6 +71,9 @@ bool Lin_Interface::readFrame(uint8_t FrameID) {
     }
     bytes_received++;
   }
+  // this->dumpBuffer();
+  // Serial.print("  ");
+  // Serial.println(bytes_received);
   uint8_t Checksum = LinMessage[bytes_received - 1];
   bytes_received--;
 
@@ -275,7 +281,8 @@ uint8_t Lin_Interface::getChecksum(uint8_t ProtectedID, uint8_t dataLen) {
 }
 
 void Lin_Interface::dumpBuffer() {
-  for (uint8_t i = 0; i < 8; i++) {
+  byte len = 8 + 1 + 4;
+  for (uint8_t i = 0; i < len; i++) {
     Serial.printf("%02X ", LinMessage[i]);
   }
   // Serial.println();
@@ -316,24 +323,35 @@ uint8_t Lin_Interface::getChecksum(uint8_t ProtectedID, uint8_t* data, uint8_t d
 
 // Writes a response back to PQ
 void Lin_Interface::writeResponse(byte protectedId, uint8_t* data, uint8_t dataLen) {
-  uint8_t cksum = getChecksum(protectedId, data, dataLen);
-  for (int i = 0; i < dataLen; ++i) {
+  uint8_t ProtectedID = getProtectedID(protectedId);
+  uint8_t cksum = getChecksum(ProtectedID, data, dataLen);
+  for (int i = 0; i < dataLen; i++) {
     HardwareSerial::write(data[i]);  // Message (array from 1..8)
+    // Serial.printf("%02X ", data[i]);
   }
+  // Serial.printf("%02X ", cksum);
+  // Serial.println();
   HardwareSerial::write(cksum);
   HardwareSerial::flush();
 }
 
 byte Lin_Interface::readLinHeader() {
+  // Clear Serial Buffer completely:
+  //
+  // this->stopSerial();
+  // this->startSerial();
   int protectedId = 0;
   bytes_received = 0;
   int startTime = millis();
   int currentPosition = 0;
   byte currentData;
-  // Read until timeout(Idea from https://github.com/skpang/Teensy32_LIN-bus_slave_demo/blob/master/lin-bus.cpp)
+  
+  //Serial.println();
+  // Read until timeout 50 ms (Idea from https://github.com/skpang/Teensy32_LIN-bus_slave_demo/blob/master/lin-bus.cpp)
   while ((millis() - startTime) <= 50) {
     if (HardwareSerial::available()) {
       currentData = HardwareSerial::read();
+      //Serial.printf("%02X ", currentData);
       currentPosition++;
       switch (currentPosition) {
         case 1:
@@ -356,14 +374,18 @@ byte Lin_Interface::readLinHeader() {
           break;
         case 3:
           protectedId = currentData;
+          //Serial.println();
           break;
       }
       if (protectedId != 0) {
         break;
       }
     }
-    vTaskDelay(1 / portTICK_PERIOD_MS);
   }
+  if(protectedId == 0){
+    Serial.println("Timeout!");
+  }
+  //
 
   // Remove Parity and Other Bit:
   protectedId = protectedId & 0b00111111;

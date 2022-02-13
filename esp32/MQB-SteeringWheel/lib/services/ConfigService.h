@@ -19,7 +19,7 @@ class ConfigState {
   }
 
   static StateUpdateResult update(JsonObject& root, ConfigState& settings) {
-    Serial.println("Got Update");
+    //Serial.println("Got Update");
 
     // configState.config = root;
     // serializeJson(configState.config, Serial);
@@ -28,7 +28,7 @@ class ConfigState {
     // deserializeJson(root, settings.config,2000);
     settings.jsonDocument.set(root);
     // Send to Serial:
-    serializeJson(settings.jsonDocument, Serial);
+    //serializeJson(settings.jsonDocument, Serial);
 
 
     return StateUpdateResult::CHANGED;

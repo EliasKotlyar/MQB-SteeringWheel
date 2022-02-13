@@ -53,6 +53,7 @@ class Lin_Interface : public HardwareSerial {
   void dumpBuffer();
   byte readLinFrame();
   void startSerial();
+  void stopSerial();
   void writeResponse(byte protectedId, uint8_t* data, uint8_t datalen);
   byte readLinHeader();
 

@@ -13,8 +13,9 @@ void ServiceManager::setup() {
   configService.begin();
   tempService.begin();
 
-  mqbStateService.begin();
-  pqStateService.begin();
+  //mqbStateService.begin();
+  //pqStateService.begin();
+  pqmaster.begin();
   // start the server
   server.begin();
 
@@ -27,9 +28,11 @@ void ServiceManager::setup() {
 }
 
 void ServiceManager::loop() {
-  esp8266React.loop();
-  mqbStateService.loop();
-  // pqStateService.loop();
+  //esp8266React.loop();
+  //mqbStateService.loop();
+  //pqmaster.loop();
+  pqStateService.begin();
+  pqStateService.loop();
 
   // String key = mqb.getLastKey();
   /*

@@ -6,32 +6,32 @@
 #include <DebugService.h>
 #define DEFAULT_KEYPRESSED_STATE 0
 
-class PQState {
+class PQSlaveState {
  public:
   String lastKeyPressed;
   int temp;
 
-  static void read(PQState& settings, JsonObject& root) {
+  static void read(PQSlaveState& settings, JsonObject& root) {
     root["lastKeyPressed"] = settings.lastKeyPressed;
     root["temp"] = settings.temp;
   }
 
-  static StateUpdateResult update(JsonObject& root, PQState& PQState) {
+  static StateUpdateResult update(JsonObject& root, PQSlaveState& PQSlaveState) {
     // No Change
     return StateUpdateResult::UNCHANGED;
   }
 };
 
-class PQService : public StatefulService<PQState> {
+class PQSlave : public StatefulService<PQSlaveState> {
  public:
-  PQService(AsyncWebServer* server, SecurityManager* securityManager, Lin_Interface* lin, DebugService* debugService);
+  PQSlave(AsyncWebServer* server, SecurityManager* securityManager, Lin_Interface* lin, DebugService* debugService);
   void setup();
   void loop();
   void begin();
 
  private:
-  HttpEndpoint<PQState> _httpEndpoint;
-  WebSocketTxRx<PQState> _webSocket;
+  HttpEndpoint<PQSlaveState> _httpEndpoint;
+  WebSocketTxRx<PQSlaveState> _webSocket;
   Lin_Interface* LinBus;
   DebugService* debugService;
 
@@ -47,16 +47,20 @@ class PQService : public StatefulService<PQState> {
   static void startTaskImpl(void* _this);
 
   std::map<String, byte> PQKeyArray = {
-
-      {"PQ_PREV", 0x16},
-      {"PQ_Next", 0x15},
-      {"PQ_PhoneVoiceMic", 0x19},
-      {"PQ_Phone", 0x1C},
-      {"PQ_View", 0x23},
-      {"PQ_Up", 0x04},
-      {"PQ_Down", 0x05},
-      {"PQ_SrcMinus", 0x02},
-      {"PQ_SrcPlus", 0x07},
+      // Left Side:
+      {"PQ_VOL_PLUS", 0x06},
+      {"PQ_VOL_MINUS", 0x07},
+      {"PQ_LEFT", 0x03},
+      {"PQ_RIGHT", 0x02},
+      {"PQ_TEL", 0x1A},
+      {"PQ_MIC", 0x2B},
+      // Right Side:
+      {"PQ_UP", 0x22},
+      {"PQ_DOWN", 0x23},
+      {"PQ_PREV", 0x09},
+      {"PQ_NEXT", 0x0A},
+      {"PQ_OK", 0x28},
+      {"PQ_RET", 0x29},
   };
   uint8_t buttons_response[8] = {0xFF, 0x00, 0xFF, 0xF0, 0x60, 0x00, 0x30, 0x00};
   static const uint8_t BUTTONS_ID = 0x0E;
