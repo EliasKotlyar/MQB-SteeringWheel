@@ -39,10 +39,12 @@ void ConfigService::begin() {
   update_handler_id_t myUpdateHandler = this->mqb->addUpdateHandler([&](const String& originId) {
     this->mqb->read([&](MQBState& mqbState) {
       String mapping = this->getMapping(mqbState.lastKeyPressed);
+      /*
       Serial.println("MQB Key Pressed:");
       Serial.println(mqbState.lastKeyPressed);
       Serial.println("PQ Key Pressed:");
       Serial.println(mapping);
+      */
 
       this->pq->update(
           [&](PQSlaveState& pqState) {

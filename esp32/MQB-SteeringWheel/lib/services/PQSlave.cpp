@@ -76,7 +76,7 @@ void PQSlave::processData(byte protectedId) {
       //  Button Data:
       byte keyid = this->getKeyIDByName(_state.keyPressed);
       if (keyid != 0) {
-        Serial.println(keyid);
+        //Serial.println(keyid);
       }
       buttons_response[0] = 0xF0 | ((buttons_response[0] + 1) % 0x10);
       buttons_response[6] = 0 | 0x30;

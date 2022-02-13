@@ -345,13 +345,13 @@ byte Lin_Interface::readLinHeader() {
   int startTime = millis();
   int currentPosition = 0;
   byte currentData;
-  
-  //Serial.println();
-  // Read until timeout 50 ms (Idea from https://github.com/skpang/Teensy32_LIN-bus_slave_demo/blob/master/lin-bus.cpp)
-  while ((millis() - startTime) <= 20) {
+
+  // Serial.println();
+  //  Read until timeout 50 ms (Idea from https://github.com/skpang/Teensy32_LIN-bus_slave_demo/blob/master/lin-bus.cpp)
+  while ((millis() - startTime) <= 50) {
     if (HardwareSerial::available()) {
       currentData = HardwareSerial::read();
-      //Serial.printf("%02X ", currentData);
+      // Serial.printf("%02X ", currentData);
       currentPosition++;
       switch (currentPosition) {
         case 1:
@@ -374,16 +374,19 @@ byte Lin_Interface::readLinHeader() {
           break;
         case 3:
           protectedId = currentData;
-          //Serial.println();
+          // Serial.println();
           break;
       }
       if (protectedId != 0) {
         break;
       }
+    } else {
+      // If none is available, wait for 3 ms
+      vTaskDelay(3 / portTICK_PERIOD_MS);
     }
   }
-  if(protectedId == 0){
-    //Serial.println("Timeout!");
+  if (protectedId == 0) {
+    // Serial.println("Timeout!");
   }
   //
 
