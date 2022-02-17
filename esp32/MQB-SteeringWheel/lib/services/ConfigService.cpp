@@ -36,7 +36,8 @@ ConfigService::ConfigService(AsyncWebServer* server,
 }
 
 void ConfigService::begin() {
-  update_handler_id_t myUpdateHandler = this->mqb->addUpdateHandler([&](const String& originId) {
+  //update_handler_id_t myUpdateHandler = 
+  this->mqb->addUpdateHandler([&](const String& originId) {
     this->mqb->read([&](MQBState& mqbState) {
       String mapping = this->getMapping(mqbState.lastKeyPressed);
       /*
@@ -78,6 +79,7 @@ String ConfigService::getMapping(String mqbKeyNumber) {
       {"MQB_DOWN", "PQ_DOWN"},
       {"MQB_FORWARD", "PQ_NEXT"},
       {"MQB_REVERSE", "PQ_PREV"},
+      {"MQB_HORN", "PQ_HORN"},
   };
   String ret = "PQ_NONE";
   for (std::map<String, String>::iterator it = mappingArray.begin(); it != mappingArray.end(); ++it) {

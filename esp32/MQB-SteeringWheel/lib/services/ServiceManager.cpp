@@ -22,15 +22,20 @@ void ServiceManager::setup() {
   pinMode(LIN_SLP, OUTPUT);
   digitalWrite(LIN_SLP, HIGH);
 
-  pqStateService.begin();
+  //pqStateService.begin();
 
 
   randomSeed(0);
+  Serial.println("Main Task is on core:" + String(xPortGetCoreID()));
+  
 }
 
 void ServiceManager::loop() {
+
   esp8266React.loop();
-  mqbStateService.loop();
+  delay(1);
+  //mqbStateService.loop();
+  //pqmaster.loop();
 
 }
 

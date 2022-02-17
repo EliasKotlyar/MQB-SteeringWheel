@@ -10,6 +10,7 @@
 
 #include <Arduino.h>
 
+
 void Lin_Interface::startSerial() {
   HardwareSerial::begin(baud, SERIAL_8N1, pin_rx, pin_tx);
 }
@@ -35,7 +36,7 @@ bool Lin_Interface::readFrame(uint8_t FrameID) {
   HardwareSerial::write(ProtectedID);  // PID
   HardwareSerial::flush();
   // wait for available data
-  vTaskDelay(100 / portTICK_PERIOD_MS);
+  vTaskDelay(linDelay);
 
   // Break, Sync and ProtectedID will be received --> discard them
   int bytes_received = -4;

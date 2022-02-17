@@ -5,7 +5,7 @@ import os
 import gzip
 
 Import("env")
-print(env.Dump())
+#print(env.Dump())
 def gzipFile(file):
     with open(file, 'rb') as f_in:
         with gzip.open(file + '.gz', 'wb') as f_out:
@@ -22,7 +22,7 @@ def buildWeb():
     os.chdir("interface")
     print("Building interface with npm")
     try:
-        env.Execute("npm install")
+        #env.Execute("npm install")
         env.Execute("npm run build")
         buildPath = Path("build")
         wwwPath = Path("../data/www")
@@ -42,5 +42,6 @@ if (len(BUILD_TARGETS) == 0):
     print("Skipping build interface step for target(s): " + ", ".join(BUILD_TARGETS))
 elif("buildfs" in BUILD_TARGETS or "uploadfs" in BUILD_TARGETS):
     print("Building rootfs")
+    buildWeb()
 else:
     print("Skipping build interface step for target(s): " + ", ".join(BUILD_TARGETS))

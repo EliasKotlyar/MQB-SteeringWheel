@@ -60,6 +60,7 @@ class PQSlave : public StatefulService<PQSlaveState> {
       {"PQ_OK", 0x28},
       {"PQ_RET", 0x29},
       {"PQ_NONE", 0x0},
+      {"PQ_HORN", 0x0}
   };
   uint8_t buttons_response[8] = {0xFF, 0x00, 0xFF, 0xF0, 0x60, 0x00, 0x30, 0x00};
   static const uint8_t BUTTONS_ID = 0x0E;

@@ -29,8 +29,8 @@ void PQSlave::begin() {
   // xTaskCreate(this->startTaskImpl, "PQTASK", 2048, this, 5, NULL );
   // Pin to Core 1, instead of 0 //
   // https://www.az-delivery.de/blogs/azdelivery-blog-fur-arduino-und-raspberry-pi/esp32-nutzung-beider-cpu-kerne-fuer-eigene-projekte
-
-  xTaskCreatePinnedToCore(this->startTaskImpl, "PQTASK", 2048, this, 5, &Core0TaskHnd, 1);
+  byte coreid = 0;
+  xTaskCreatePinnedToCore(this->startTaskImpl, "PQTASK", 2048, this, 5, &Core0TaskHnd, coreid);
 }
 
 void PQSlave::setKey(String key) {
@@ -53,7 +53,7 @@ void PQSlave::startTaskImpl(void* _this) {
 }
 
 void PQSlave::loop(void) {
-  Serial.print("Application CPU is on core:");
+  Serial.print("PQ Task is on core:");
   Serial.println(xPortGetCoreID());
   LinBus->startSerial();
   while (1) {
@@ -74,13 +74,19 @@ void PQSlave::processData(byte protectedId) {
       // Serial.printf("%02X ", protectedId);
       // Serial.print("  ");
       //  Button Data:
-      byte keyid = this->getKeyIDByName(_state.keyPressed);
-      if (keyid != 0) {
-        //Serial.println(keyid);
-      }
+
       buttons_response[0] = 0xF0 | ((buttons_response[0] + 1) % 0x10);
       buttons_response[6] = 0 | 0x30;
+      buttons_response[7] = 0;
+
+      byte keyid = this->getKeyIDByName(_state.keyPressed);
+      if (keyid != 0) {
+        // Serial.println(keyid);
+      }
       buttons_response[1] = keyid;
+      if (_state.keyPressed == "PQ_HORN") {
+        buttons_response[7] = 0x02;
+      }
       /*
        */
       // buttons_response[1] = 0x07;
@@ -113,6 +119,10 @@ void PQSlave::processData(byte protectedId) {
     }
     case LIGHT_ID: {
       // Serial.println(protectedId);
+      // Read 5 Bytes:
+      for (uint8_t i = 0; i < 5; i++) {
+        LinBus->read();
+      }
       break;
     }
     default: {

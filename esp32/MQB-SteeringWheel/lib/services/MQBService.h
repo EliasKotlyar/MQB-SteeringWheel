@@ -43,7 +43,7 @@ class MQBService : public StatefulService<MQBState> {
   uint8_t lightValue = 255;
   uint8_t temp = 0;
   void checkLastKey(byte linKey);
-  
+
   std::map<String, byte> mqbKeyArray = {
       {"MQB_NONE", 0x00},
       {"MQB_RESET", 0x88},
@@ -64,6 +64,8 @@ class MQBService : public StatefulService<MQBState> {
       {"MQB_DOWN", 0x05},
       {"MQB_FORWARD", 0x16},
       {"MQB_REVERSE", 0x15},
+      {"MQB_ONOFF", 0x00},
+      {"MQB_HORN", 0x00},
   };
 
   void getLastKeyCode();

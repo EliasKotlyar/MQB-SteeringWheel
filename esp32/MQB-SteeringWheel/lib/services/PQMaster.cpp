@@ -68,7 +68,7 @@ void PQMasterService::checkLastKey(byte linKey) {
 void PQMasterService::readLinData(uint8_t frameId) {
   bool chkSumValid = LinBus->readFrame(frameId);
   if (chkSumValid) {
-    //LinBus->dumpBuffer();
-    //Serial.println();
+    LinBus->dumpBuffer();
+    Serial.println();
   }
 }
